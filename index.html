@@ -112,14 +112,18 @@
   .card-body{
     display:flex; gap:12px; align-items:flex-start;
   }
+  .thumb-col{
+    display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0;
+  }
   .thumb-btn{
     border:none; padding:0; cursor:pointer; display:block; flex-shrink:0;
   }
   .thumb-btn .thumb{ pointer-events:none; }
   .thumb{
     width:56px; height:56px; border-radius:12px; object-fit:cover; flex-shrink:0;
-    background:var(--surface-2); border:1px solid var(--border);
+    background:var(--surface); display:block;
   }
+  .thumb-col .tag{ font-size:10px; padding:3px 8px; text-align:center; }
 
   /* Detail sheet */
   .detail-image{
@@ -138,6 +142,7 @@
   .thumb-broken{
     display:flex; align-items:center; justify-content:center;
     color:var(--text-2); font-size:18px; font-weight:600;
+    background:var(--surface-2);
   }
   .card-main{flex:1; min-width:0;}
   .card-top{
@@ -890,10 +895,10 @@
 
       card.innerHTML =
         '<div class="card-body">' +
-          thumbHtml +
+          '<div class="thumb-col">' + thumbHtml + tagHtml + '</div>' +
           '<div class="card-main">' +
             '<div class="card-top">' +
-              '<div>' + brandHtml + '<div class="title-line">' + titleHtml + tagHtml + '</div></div>' +
+              '<div>' + brandHtml + '<div class="title-line">' + titleHtml + '</div></div>' +
               buildPriceBlockHtml(priceInfo) +
             '</div>' +
             installmentsHtml +
