@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wishlist</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2315140f'/%3E%3Cpath d='M12 4C12 8.42 8.42 12 4 12C8.42 12 12 15.58 12 20C12 15.58 15.58 12 20 12C15.58 12 12 8.42 12 4Z' fill='%23f5c518'/%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#fbfaf8;
@@ -111,10 +112,29 @@
   .card-body{
     display:flex; gap:12px; align-items:flex-start;
   }
+  .thumb-btn{
+    border:none; padding:0; cursor:pointer; display:block; flex-shrink:0;
+  }
+  .thumb-btn .thumb{ pointer-events:none; }
   .thumb{
     width:56px; height:56px; border-radius:12px; object-fit:cover; flex-shrink:0;
     background:var(--surface-2); border:1px solid var(--border);
   }
+
+  /* Detail sheet */
+  .detail-image{
+    width:100%; max-height:340px; object-fit:cover; border-radius:14px;
+    background:var(--surface-2); display:block; margin-bottom:16px;
+  }
+  .detail-title{
+    font-size:20px; font-weight:700; letter-spacing:-0.015em; color:var(--text);
+    text-decoration:none; display:inline-flex; align-items:center; gap:7px;
+  }
+  .detail-title svg{width:15px;height:15px; opacity:.45;}
+  .detail-row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px;
+  }
+  .detail-price{font-size:22px; font-weight:800; letter-spacing:-0.02em;}
   .thumb-broken{
     display:flex; align-items:center; justify-content:center;
     color:var(--text-2); font-size:18px; font-weight:600;
@@ -140,9 +160,32 @@
     font-variant-numeric:tabular-nums; font-weight:800; font-size:22px;
     white-space:nowrap; letter-spacing:-0.02em; color:var(--text); flex-shrink:0;
   }
-  .card-bottom{
-    display:flex; justify-content:flex-start; margin-top:12px;
+  .brand-label{
+    font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--text-2); margin-bottom:4px;
   }
+  .price-block{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+  .price-top{ display:flex; align-items:center; gap:7px; }
+  .tag-sale{
+    display:inline-flex; align-items:center; font-size:10.5px; font-weight:800;
+    letter-spacing:.04em; text-transform:uppercase; padding:3px 8px; border-radius:100px;
+    background:var(--danger); color:#ffffff; flex-shrink:0;
+  }
+  .price-old{ font-size:12.5px; color:var(--text-2); white-space:nowrap; }
+  .price-old .strike{ text-decoration:line-through; }
+  .price-old .pct{ font-weight:700; color:var(--danger); margin-left:4px; }
+  .card-bottom{
+    display:flex; justify-content:space-between; align-items:center; margin-top:12px;
+  }
+  .drag-handle{
+    width:26px;height:26px;border-radius:50%; border:none; background:var(--surface-2);
+    color:var(--text-2); cursor:grab; display:flex; align-items:center; justify-content:center;
+    touch-action:none;
+  }
+  .drag-handle svg{width:14px; height:14px;}
+  .drag-handle:active{cursor:grabbing;}
+  .card.sortable-ghost{opacity:.35;}
+  .card.sortable-drag{box-shadow:0 10px 24px rgba(0,0,0,.18);}
   .card-menu{position:relative;}
   .kebab{
     width:26px;height:26px;border-radius:50%; border:none; background:var(--surface-2);
@@ -187,7 +230,7 @@
 
   /* Floating add button */
   .fab{
-    position:fixed; right:20px; bottom:calc(24px + var(--safe-bottom));
+    position:fixed; left:50%; bottom:calc(24px + var(--safe-bottom)); transform:translateX(-50%);
     width:56px; height:56px; border-radius:50%; background:var(--accent); color:var(--accent-text);
     border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
     box-shadow:0 10px 26px rgba(31,122,102,.35); z-index:30;
@@ -266,6 +309,11 @@
     min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
   }
   .auth-box{width:100%; max-width:360px;}
+  .auth-logo{
+    width:56px; height:56px;
+    display:flex; align-items:center; justify-content:center; margin:0 auto 18px;
+  }
+  .auth-logo svg{width:44px; height:44px; color:#f5c518;}
   .auth-box h1{font-size:28px; font-weight:700; letter-spacing:-0.02em; margin:0 0 6px; text-align:center;}
   .auth-sub{font-size:13.5px; color:var(--text-2); text-align:center; margin:0 0 26px; line-height:1.5;}
   .auth-error{
@@ -276,6 +324,9 @@
 <body>
 <div class="auth-screen" id="authScreen">
   <div class="auth-box">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C12 6.63 6.63 12 0 12C6.63 12 12 17.37 12 24C12 17.37 17.37 12 24 12C17.37 12 12 6.63 12 0Z"/></svg>
+    </div>
     <h1>Wishlist</h1>
     <p class="auth-sub">Accedi per sincronizzare la lista su tutti i dispositivi</p>
     <div class="field">
@@ -327,6 +378,10 @@
   <div class="sheet-handle"></div>
   <h2 id="itemSheetTitle">Nuovo oggetto</h2>
   <div class="field">
+    <label for="fBrand">Marca</label>
+    <input id="fBrand" type="text" placeholder="Es. Adidas">
+  </div>
+  <div class="field">
     <label for="fTitle">Titolo</label>
     <input id="fTitle" type="text" placeholder="Es. Sneakers Samba">
   </div>
@@ -336,9 +391,13 @@
       <div class="price-wrap"><span>&euro;</span><input id="fPrice" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00"></div>
     </div>
     <div class="field">
-      <label for="fCat">Categoria</label>
-      <select id="fCat"></select>
+      <label for="fDiscount">Prezzo scontato</label>
+      <div class="price-wrap"><span>&euro;</span><input id="fDiscount" type="number" inputmode="decimal" step="0.01" min="0" placeholder="Opzionale"></div>
     </div>
+  </div>
+  <div class="field">
+    <label for="fCat">Categoria</label>
+    <select id="fCat"></select>
   </div>
   <div class="field">
     <label for="fUrl">Sito web</label>
@@ -373,14 +432,23 @@
   <button class="btn btn-ghost" id="cancelCatBtn">Chiudi</button>
 </div>
 
+<div class="sheet" id="detailSheet">
+  <div class="sheet-handle"></div>
+  <div id="detailContent"></div>
+  <button class="btn btn-ghost" id="closeDetailBtn">Chiudi</button>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (function(){
   const SUPABASE_URL = 'https://qaljsehjzfadczyckbvw.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_cpvo0rwOgilOJ7NqrKZ6kQ_OOiGyHle';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  document.documentElement.setAttribute('data-theme', 'dark');
 
   let currentUserId = null;
   let authMode = 'login';
@@ -405,6 +473,32 @@
   const $ = (id) => document.getElementById(id);
   const content = $('content');
   const chipsEl = $('chips');
+
+  if(window.Sortable){
+    Sortable.create(content, {
+      handle: '.drag-handle',
+      animation: 150,
+      onEnd: function(){
+        const newIds = Array.prototype.map.call(content.querySelectorAll('.card'), function(el){ return el.dataset.id; });
+        applyReorder(newIds);
+        save();
+      }
+    });
+  }
+
+  function applyReorder(newIdsInOrder){
+    const idToItem = {};
+    state.items.forEach(function(it){ idToItem[it.id] = it; });
+    const slots = [];
+    state.items.forEach(function(it, idx){
+      if(currentFilter === 'all' || it.categoryId === currentFilter) slots.push(idx);
+    });
+    slots.forEach(function(idx, i){
+      if(newIdsInOrder[i] && idToItem[newIdsInOrder[i]]){
+        state.items[idx] = idToItem[newIdsInOrder[i]];
+      }
+    });
+  }
 
   function uid(){ return (crypto.randomUUID ? crypto.randomUUID() : 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2)); }
 
@@ -454,6 +548,11 @@
         needsSave = true;
       }
     });
+    if(!state.itemsOrderMigrated){
+      state.items = state.items.slice().reverse();
+      state.itemsOrderMigrated = true;
+      needsSave = true;
+    }
     applyTheme();
     renderChips();
     renderItems();
@@ -711,6 +810,44 @@
     }catch(e){ return url; }
   }
 
+  function getPriceInfo(item){
+    const price = Number(item.price) || 0;
+    const discountPrice = Number(item.discountPrice) || 0;
+    const hasDiscount = discountPrice > 0 && discountPrice < price;
+    const effectivePrice = hasDiscount ? discountPrice : price;
+    const pct = hasDiscount ? Math.round((1 - discountPrice / price) * 100) : 0;
+    return { price: price, discountPrice: discountPrice, hasDiscount: hasDiscount, effectivePrice: effectivePrice, pct: pct };
+  }
+
+  function buildPriceBlockHtml(info){
+    if(info.price <= 0) return '<span class="card-price"></span>';
+    if(info.hasDiscount){
+      return '<div class="price-block">' +
+          '<div class="price-top"><span class="tag-sale">Saldo</span><span class="card-price">' + fmtPrice(info.discountPrice) + '</span></div>' +
+          '<div class="price-old"><span class="strike">' + fmtPrice(info.price) + '</span><span class="pct">-' + info.pct + '%</span></div>' +
+        '</div>';
+    }
+    return '<span class="card-price">' + fmtPrice(info.price) + '</span>';
+  }
+
+  function buildInstallmentsHtml(price, payIn3){
+    if(!(price > 0) || !payIn3) return '';
+    const inst = calcPayIn3(price);
+    const outOfRange = price < 30 || price > 2000;
+    return '<div class="stub">' +
+        '<div class="stub-head">' +
+          '<span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Paga in 3 con PayPal</span>' +
+          (outOfRange ? '' : '<span class="note">senza interessi</span>') +
+        '</div>' +
+        '<div class="installments">' +
+          '<div class="inst"><div class="n">Oggi</div><div class="v">' + fmtPrice(inst[0]) + '</div></div>' +
+          '<div class="inst"><div class="n">+30gg</div><div class="v">' + fmtPrice(inst[1]) + '</div></div>' +
+          '<div class="inst"><div class="n">+60gg</div><div class="v">' + fmtPrice(inst[2]) + '</div></div>' +
+        '</div>' +
+        (outOfRange ? '<div class="warn">Paga in 3 e in genere disponibile per importi tra 30 e 2000 euro, verifica i requisiti su PayPal.</div>' : '') +
+      '</div>';
+  }
+
   function renderItems(){
     content.innerHTML = '';
     const list = state.items.filter(function(it){ return currentFilter === 'all' || it.categoryId === currentFilter; });
@@ -723,13 +860,15 @@
       return;
     }
 
-    list.slice().reverse().forEach(function(item){
+    list.forEach(function(item){
       const card = document.createElement('div');
       card.className = 'card';
 
       const cat = state.categories.find(function(c){ return c.id === item.categoryId; });
-      const price = Number(item.price) || 0;
+      const priceInfo = getPriceInfo(item);
       const colors = catColor(cat);
+
+      const brandHtml = item.brand ? '<div class="brand-label">' + escapeHtml(item.brand) + '</div>' : '';
 
       let titleHtml;
       if(item.url){
@@ -743,27 +882,10 @@
         ? '<span class="tag" style="background:' + colors.bg + ';color:' + colors.text + '">' + escapeHtml(cat.name) + '</span>'
         : '';
 
-      let installmentsHtml = '';
-      if(price > 0 && item.payIn3){
-        const inst = calcPayIn3(price);
-        const outOfRange = price < 30 || price > 2000;
-        installmentsHtml =
-          '<div class="stub">' +
-            '<div class="stub-head">' +
-              '<span class="label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>Paga in 3 con PayPal</span>' +
-              (outOfRange ? '' : '<span class="note">senza interessi</span>') +
-            '</div>' +
-            '<div class="installments">' +
-              '<div class="inst"><div class="n">Oggi</div><div class="v">' + fmtPrice(inst[0]) + '</div></div>' +
-              '<div class="inst"><div class="n">+30gg</div><div class="v">' + fmtPrice(inst[1]) + '</div></div>' +
-              '<div class="inst"><div class="n">+60gg</div><div class="v">' + fmtPrice(inst[2]) + '</div></div>' +
-            '</div>' +
-            (outOfRange ? '<div class="warn">Paga in 3 e in genere disponibile per importi tra 30 e 2000 euro, verifica i requisiti su PayPal.</div>' : '') +
-          '</div>';
-      }
+      const installmentsHtml = buildInstallmentsHtml(priceInfo.effectivePrice, item.payIn3);
 
       const thumbHtml = item.imageUrl
-        ? '<img class="thumb" src="' + escapeAttr(item.imageUrl) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<div class=&quot;thumb thumb-broken&quot; title=&quot;Immagine non caricata&quot;>?</div>\'">'
+        ? '<button type="button" class="thumb-btn" data-detail-id="' + item.id + '"><img class="thumb" src="' + escapeAttr(item.imageUrl) + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML=\'<div class=&quot;thumb thumb-broken&quot;>?</div>\'"></button>'
         : '';
 
       card.innerHTML =
@@ -771,17 +893,25 @@
           thumbHtml +
           '<div class="card-main">' +
             '<div class="card-top">' +
-              '<div class="title-line">' + titleHtml + tagHtml + '</div>' +
-              '<span class="card-price">' + (price > 0 ? fmtPrice(price) : '') + '</span>' +
+              '<div>' + brandHtml + '<div class="title-line">' + titleHtml + tagHtml + '</div></div>' +
+              buildPriceBlockHtml(priceInfo) +
             '</div>' +
             installmentsHtml +
             '<div class="card-bottom">' +
               '<div class="card-menu">' +
                 '<button class="kebab" aria-label="Modifica oggetto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>' +
               '</div>' +
+              '<button class="drag-handle" aria-label="Trascina per riordinare"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/></svg></button>' +
             '</div>' +
           '</div>' +
         '</div>';
+
+      card.dataset.id = item.id;
+
+      const thumbBtn = card.querySelector('.thumb-btn');
+      if(thumbBtn){
+        thumbBtn.addEventListener('click', function(){ openDetailSheet(item); });
+      }
 
       const kebab = card.querySelector('.kebab');
       kebab.addEventListener('click', function(e){
@@ -829,6 +959,47 @@
     editingItemId = null;
   }
   $('overlay').addEventListener('click', hideSheets);
+
+  function openDetailSheet(item){
+    const cat = state.categories.find(function(c){ return c.id === item.categoryId; });
+    const priceInfo = getPriceInfo(item);
+    const colors = catColor(cat);
+
+    const imageHtml = item.imageUrl
+      ? '<img class="detail-image" src="' + escapeAttr(item.imageUrl) + '" alt="">'
+      : '';
+
+    const brandHtml = item.brand ? '<div class="brand-label">' + escapeHtml(item.brand) + '</div>' : '';
+
+    let titleHtml;
+    if(item.url){
+      titleHtml = '<a class="detail-title" href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.title) +
+        ' <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M7 7h10v10"/></svg></a>';
+    } else {
+      titleHtml = '<span class="detail-title">' + escapeHtml(item.title) + '</span>';
+    }
+
+    const tagHtml = cat
+      ? '<span class="tag" style="background:' + colors.bg + ';color:' + colors.text + '">' + escapeHtml(cat.name) + '</span>'
+      : '';
+
+    const priceRowHtml = priceInfo.hasDiscount
+      ? '<div class="detail-row"><div class="price-block" style="align-items:flex-start;">' +
+          '<div class="price-top"><span class="tag-sale">Saldo</span><span class="detail-price">' + fmtPrice(priceInfo.discountPrice) + '</span></div>' +
+          '<div class="price-old"><span class="strike">' + fmtPrice(priceInfo.price) + '</span><span class="pct">-' + priceInfo.pct + '%</span></div>' +
+        '</div></div>'
+      : '<div class="detail-row"><span class="detail-price">' + (priceInfo.price > 0 ? fmtPrice(priceInfo.price) : '') + '</span></div>';
+
+    $('detailContent').innerHTML =
+      imageHtml +
+      brandHtml +
+      '<div class="title-line">' + titleHtml + tagHtml + '</div>' +
+      priceRowHtml +
+      buildInstallmentsHtml(priceInfo.effectivePrice, item.payIn3);
+
+    showSheet('detailSheet');
+  }
+  $('closeDetailBtn').addEventListener('click', hideSheets);
 
   $('fabAdd').addEventListener('click', function(){ openItemSheet(); });
 
@@ -895,8 +1066,10 @@
     if(item){
       editingItemId = item.id;
       $('itemSheetTitle').textContent = 'Modifica oggetto';
+      $('fBrand').value = item.brand || '';
       $('fTitle').value = item.title || '';
       $('fPrice').value = item.price || '';
+      $('fDiscount').value = item.discountPrice || '';
       $('fUrl').value = item.url || '';
       $('fImgFile').value = '';
       showImgPreview(item.imageUrl || null);
@@ -905,8 +1078,10 @@
     } else {
       editingItemId = null;
       $('itemSheetTitle').textContent = 'Nuovo oggetto';
+      $('fBrand').value = '';
       $('fTitle').value = '';
       $('fPrice').value = '';
+      $('fDiscount').value = '';
       $('fUrl').value = '';
       $('fImgFile').value = '';
       showImgPreview(null);
@@ -920,8 +1095,11 @@
   $('cancelItemBtn').addEventListener('click', hideSheets);
 
   $('saveItemBtn').addEventListener('click', function(){
+    const brand = $('fBrand').value.trim();
     const title = $('fTitle').value.trim();
     const price = parseFloat($('fPrice').value);
+    const discountRaw = $('fDiscount').value.trim();
+    const discountPrice = discountRaw ? parseFloat(discountRaw) : 0;
     const url = $('fUrl').value.trim();
     const imageUrl = currentImageData;
     const categoryId = $('fCat').value || null;
@@ -929,12 +1107,18 @@
 
     if(!title){ toast('Inserisci un titolo'); return; }
     if(url && !/^https?:\/\//i.test(url)){ toast('Il sito deve iniziare con http:// o https://'); return; }
+    if(discountRaw && !isNaN(discountPrice) && discountPrice > 0 && !isNaN(price) && discountPrice >= price){
+      toast('Il prezzo scontato deve essere minore del prezzo pieno');
+      return;
+    }
 
     if(editingItemId){
       const it = state.items.find(function(i){ return i.id === editingItemId; });
       if(it){
+        it.brand = brand;
         it.title = title;
         it.price = isNaN(price) ? 0 : price;
+        it.discountPrice = isNaN(discountPrice) ? 0 : discountPrice;
         it.url = url;
         it.imageUrl = imageUrl;
         it.categoryId = categoryId;
@@ -942,10 +1126,12 @@
       }
       toast('Oggetto aggiornato');
     } else {
-      state.items.push({
+      state.items.unshift({
         id: uid(),
+        brand: brand,
         title: title,
         price: isNaN(price) ? 0 : price,
+        discountPrice: isNaN(discountPrice) ? 0 : discountPrice,
         url: url,
         imageUrl: imageUrl,
         categoryId: categoryId,
